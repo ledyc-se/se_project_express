@@ -1,7 +1,8 @@
 const ClothingItem = require("../models/clothingItem");
 const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
 
-const likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
+const likeItem = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
@@ -22,7 +23,8 @@ const likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
         .send({ message: "An error has occurred on the server" });
     });
 
-const dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
+const dislikeItem = (req, res) =>
+  ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
     { new: true }

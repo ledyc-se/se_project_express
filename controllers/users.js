@@ -1,7 +1,8 @@
 const User = require("../models/user");
 const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
 
-const getUsers = (req, res) => User.find({})
+const getUsers = (req, res) =>
+  User.find({})
     .then((users) => res.send(users))
     .catch((err) => {
       console.error(err);

@@ -6,14 +6,16 @@ const Item = require("../models/clothingItem");
 const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
 const { likeItem, dislikeItem } = require("../controllers/clothingItems");
 
-router.get("/", (req, res) => Item.find({})
+router.get("/", (req, res) =>
+  Item.find({})
     .then((items) => res.send(items))
     .catch((err) => {
       console.error(err);
       return res
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
-    }));
+    })
+);
 
 router.post("/", (req, res) => {
   const { name, weather, imageUrl } = req.body;
