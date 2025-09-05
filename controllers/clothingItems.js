@@ -36,33 +36,34 @@ const createItem = (req, res) => {
     });
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = async (req, res) => {
   const userId = req.user._id;
   const { itemId } = req.params;
 
-  return Item.findById(itemId)
-    .then((item) => {
-      if (!item) {
-        return res.status(NOT_FOUND).send({ message: "Item not found" });
-      }
+  try {
+    const item = await Item.findById(itemId);
 
-      if (item.owner.toString() !== userId.toString()) {
-        return res
-          .status(FORBIDDEN)
-          .send({ message: "You are not allowed to delete this item" });
-      }
+    if (!item) {
+      return res.status(NOT_FOUND).send({ message: "Item not found" });
+    }
 
-      return item.deleteOne().then(() => res.send({ message: "Item deleted" }));
-    })
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
-      }
+    if (item.owner.toString() !== userId.toString()) {
       return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
-    });
+        .status(FORBIDDEN)
+        .send({ message: "You are not allowed to delete this item" });
+    }
+
+    await item.deleteOne();
+    return res.send({ message: "Item deleted" });
+  } catch (err) {
+    console.error(err);
+    if (err.name === "CastError") {
+      return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
+    }
+    return res
+      .status(SERVER_ERROR)
+      .send({ message: "An error has occurred on the server" });
+  }
 };
 
 const likeItem = (req, res) => {
