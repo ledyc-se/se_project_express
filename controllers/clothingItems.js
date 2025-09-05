@@ -6,7 +6,7 @@ const {
   FORBIDDEN,
 } = require("../utils/errors");
 
-const getItems = (req, res) => {
+const getItems = (req, res) =>
   Item.find({})
     .then((items) => res.send(items))
     .catch((err) => {
@@ -15,7 +15,6 @@ const getItems = (req, res) => {
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
-};
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -66,8 +65,8 @@ const deleteItem = async (req, res) => {
   }
 };
 
-const likeItem = (req, res) => {
-  return Item.findByIdAndUpdate(
+const likeItem = (req, res) =>
+  Item.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
@@ -82,10 +81,9 @@ const likeItem = (req, res) => {
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
-};
 
-const dislikeItem = (req, res) => {
-  return Item.findByIdAndUpdate(
+const dislikeItem = (req, res) =>
+  Item.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
@@ -100,7 +98,6 @@ const dislikeItem = (req, res) => {
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
-};
 
 module.exports = {
   getItems,
