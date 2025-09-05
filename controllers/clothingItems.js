@@ -1,5 +1,10 @@
 const Item = require("../models/clothingItem");
-const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  SERVER_ERROR,
+  FORBIDDEN,
+} = require("../utils/errors");
 
 const getItems = (req, res) => {
   Item.find({})
@@ -32,21 +37,29 @@ const createItem = (req, res) => {
 };
 
 const deleteItem = (req, res) => {
+  const userId = req.user._id;
   const { itemId } = req.params;
 
-  return Item.findByIdAndDelete(itemId)
+  Item.findById(itemId)
     .then((item) => {
       if (!item) {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
-      return res.send({ message: "Item deleted", item });
+
+      if (item.owner.toString() !== userId.toString()) {
+        return res
+          .status(FORBIDDEN)
+          .send({ message: "You are not allowed to delete this item" });
+      }
+
+      return item.deleteOne().then(() => res.send({ message: "Item deleted" }));
     })
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
       }
-      return res
+      res
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });

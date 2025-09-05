@@ -1,7 +1,5 @@
 const express = require("express");
 
-const router = express.Router();
-
 const {
   getItems,
   createItem,
@@ -10,10 +8,12 @@ const {
   dislikeItem,
 } = require("../controllers/clothingItems");
 
+const router = express.Router();
+
 router.get("/", getItems);
 router.post("/", createItem);
+router.delete("/:itemId", deleteItem);
 router.put("/:itemId/likes", likeItem);
 router.delete("/:itemId/likes", dislikeItem);
-router.delete("/:itemId", deleteItem);
 
 module.exports = router;
