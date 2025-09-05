@@ -40,7 +40,7 @@ const deleteItem = (req, res) => {
   const userId = req.user._id;
   const { itemId } = req.params;
 
-  Item.findById(itemId)
+  return Item.findById(itemId)
     .then((item) => {
       if (!item) {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
@@ -59,7 +59,7 @@ const deleteItem = (req, res) => {
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
       }
-      res
+      return res
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
@@ -71,12 +71,7 @@ const likeItem = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .then((item) => {
-      if (!item) {
-        return res.status(NOT_FOUND).send({ message: "Item not found" });
-      }
-      return res.send(item);
-    })
+    .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
@@ -94,12 +89,7 @@ const dislikeItem = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true }
   )
-    .then((item) => {
-      if (!item) {
-        return res.status(NOT_FOUND).send({ message: "Item not found" });
-      }
-      return res.send(item);
-    })
+    .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
