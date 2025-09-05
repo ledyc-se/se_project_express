@@ -65,8 +65,8 @@ const deleteItem = (req, res) => {
     });
 };
 
-const likeItem = (req, res) =>
-  Item.findByIdAndUpdate(
+const likeItem = (req, res) => {
+  return Item.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
@@ -86,9 +86,10 @@ const likeItem = (req, res) =>
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
+};
 
-const dislikeItem = (req, res) =>
-  Item.findByIdAndUpdate(
+const dislikeItem = (req, res) => {
+  return Item.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
@@ -108,6 +109,7 @@ const dislikeItem = (req, res) =>
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
+};
 
 module.exports = {
   getItems,

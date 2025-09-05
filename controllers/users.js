@@ -101,7 +101,7 @@ const updateCurrentUser = (req, res) => {
   const userId = req.user._id;
   const { name, avatar } = req.body;
 
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     userId,
     { name, avatar },
     { new: true, runValidators: true }
@@ -110,7 +110,7 @@ const updateCurrentUser = (req, res) => {
       if (!user) {
         return res.status(NOT_FOUND).send({ message: "User not found" });
       }
-      res.send(user);
+      return res.send(user);
     })
     .catch((err) => {
       console.error(err);
@@ -119,7 +119,7 @@ const updateCurrentUser = (req, res) => {
           .status(BAD_REQUEST)
           .send({ message: "Invalid data provided for update" });
       }
-      res
+      return res
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
     });
