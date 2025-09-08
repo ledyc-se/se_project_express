@@ -43,7 +43,7 @@ const createUser = (req, res) => {
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.code === 11000) {
-        return res.status(409).send({ message: "Email already exists" });
+        return res.status(NOT_FOUND).send({ message: "User already exists" });
       }
 
       if (err instanceof mongoose.Error.ValidationError) {
