@@ -71,7 +71,12 @@ const likeItem = (req, res) =>
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .then((item) => res.send(item))
+    .then((item) => {
+      if (!item) {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
+      }
+      return res.send(item);
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
@@ -82,22 +87,29 @@ const likeItem = (req, res) =>
         .send({ message: "An error has occurred on the server" });
     });
 
-const dislikeItem = (req, res) =>
-  Item.findByIdAndUpdate(
-    req.params.itemId,
+const dislikeItem = (req, res) => {
+  const { itemId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res.status(400).send({ message: "Invalid item ID" });
+  }
+
+  ClothingItem.findByIdAndUpdate(
+    itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
   )
-    .then((item) => res.send(item))
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
+    .then((item) => {
+      if (!item) {
+        return res.status(404).send({ message: "Item not found" });
       }
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+      res.send(item);
+    })
+    .catch((err) => {
+      console.error("Dislike Item Error:", err);
+      res.status(500).send({ message: "Internal Server Error" });
     });
+};
 
 module.exports = {
   getItems,

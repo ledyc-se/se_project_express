@@ -36,43 +36,23 @@ const getCurrentUser = (req, res) => {
     });
 };
 
-const createUser = async (req, res) => {
+const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
+  User.create({ name, avatar, email, password })
+    .then((user) => res.status(201).send(user))
+    .catch((err) => {
+      if (err.code === 11000) {
+        return res.status(409).send({ message: "Email already exists" });
+      }
 
-    const user = await User.create({
-      name,
-      avatar,
-      email,
-      password: hashedPassword,
+      if (err instanceof mongoose.Error.ValidationError) {
+        return res.status(400).send({ message: err.message });
+      }
+
+      console.error("Create User Error:", err);
+      return res.status(500).send({ message: "Internal Server Error" });
     });
-
-    const userWithoutPassword = user.toObject();
-    delete userWithoutPassword.password;
-
-    return res.status(201).send(userWithoutPassword);
-  } catch (err) {
-    console.error("Create User Error:", err);
-
-    if (
-      err.code === 11000 ||
-      (err.name === "MongoServerError" && err.code === 11000)
-    ) {
-      console.log("Duplicate email error detected");
-      return res.status(409).send({ message: "Email already exists" });
-    }
-
-    if (err.name === "ValidationError") {
-      return res
-        .status(BAD_REQUEST)
-        .send({ message: "Invalid data passed when creating a user" });
-    }
-    return res
-      .status(SERVER_ERROR)
-      .send({ message: "An error has occurred on the server" });
-  }
 };
 
 const login = (req, res) => {
