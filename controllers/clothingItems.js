@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Item = require("../models/clothingItem");
 const {
   BAD_REQUEST,
@@ -91,23 +92,25 @@ const dislikeItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).send({ message: "Invalid item ID" });
+    return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
   }
 
-  ClothingItem.findByIdAndUpdate(
+  return Item.findByIdAndUpdate(
     itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
   )
     .then((item) => {
       if (!item) {
-        return res.status(404).send({ message: "Item not found" });
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
-      res.send(item);
+      return res.send(item);
     })
     .catch((err) => {
       console.error("Dislike Item Error:", err);
-      res.status(500).send({ message: "Internal Server Error" });
+      return res
+        .status(SERVER_ERROR)
+        .send({ message: "Internal server error" });
     });
 };
 
