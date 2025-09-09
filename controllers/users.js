@@ -1,18 +1,14 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
-const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
-
-const getUsers = (req, res) =>
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
-    });
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  CONFLICT,
+  SERVER_ERROR,
+} = require("../utils/errors");
 
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
@@ -37,21 +33,34 @@ const getCurrentUser = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar, email, password } = req.body;
+  const { email, password, name, avatar } = req.body;
+  bcrypt
+    .hash(password, 10)
+    .then((hash) =>
+      User.create({
+        email,
+        password: hash,
+        name,
+        avatar,
+      })
+    )
+    .then((user) => {
+      const userWithoutPassword = user.toObject();
+      delete userWithoutPassword.password;
 
-  User.create({ name, avatar, email, password })
-    .then((user) => res.status(201).send(user))
+      res.status(201).send(userWithoutPassword);
+    })
     .catch((err) => {
       if (err.code === 11000) {
-        return res.status(NOT_FOUND).send({ message: "User already exists" });
+        return res.status(CONFLICT).send({ message: "User already exists" });
       }
-
       if (err instanceof mongoose.Error.ValidationError) {
-        return res.status(400).send({ message: err.message });
+        return res.status(BAD_REQUEST).send({ message: err.message });
       }
-
       console.error("Create User Error:", err);
-      return res.status(500).send({ message: "Internal Server Error" });
+      return res
+        .status(SERVER_ERROR)
+        .send({ message: "Internal Server Error" });
     });
 };
 
