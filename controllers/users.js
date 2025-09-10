@@ -115,7 +115,6 @@ const updateCurrentUser = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   getCurrentUser,
   createUser,
   login,
