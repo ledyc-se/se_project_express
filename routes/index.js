@@ -1,6 +1,5 @@
 const express = require("express");
 const { login, createUser } = require("../controllers/users");
-const auth = require("../middlewares/auth");
 
 const userRouter = require("./users");
 const itemRouter = require("./clothingItems");

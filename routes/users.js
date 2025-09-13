@@ -1,9 +1,5 @@
 const express = require("express");
-const {
-  getUsers,
-  getCurrentUser,
-  updateCurrentUser,
-} = require("../controllers/users");
+const { getCurrentUser, updateCurrentUser } = require("../controllers/users");
 
 const auth = require("../middlewares/auth");
 

@@ -1,7 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const auth = require("./middlewares/auth");
 
 const router = require("./routes");
 const { NOT_FOUND } = require("./utils/errors");
