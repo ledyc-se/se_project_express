@@ -90,27 +90,25 @@ const updateCurrentUser = (req, res) => {
   const userId = req.user._id;
   const { name, avatar } = req.body;
 
-  return User.findByIdAndUpdate(
+  User.findByIdAndUpdate(
     userId,
     { name, avatar },
     { new: true, runValidators: true }
   )
     .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
-      }
-      return res.send(user);
+      if (!user) return res.status(404).send({ message: "User not found" });
+      const userObj = user.toObject();
+      delete userObj.password;
+      res.send(userObj);
     })
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
         return res
-          .status(BAD_REQUEST)
+          .status(400)
           .send({ message: "Invalid data provided for update" });
       }
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+      res.status(500).send({ message: "Server error" });
     });
 };
 
