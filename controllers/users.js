@@ -34,6 +34,9 @@ const getCurrentUser = (req, res) => {
 
 const createUser = (req, res) => {
   const { email, password, name, avatar } = req.body;
+  if (!email || !password || !name) {
+    return res.status(BAD_REQUEST).send({ message: "Email, password, and name are required" })
+  };
   bcrypt
     .hash(password, 10)
     .then((hash) =>
