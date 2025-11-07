@@ -7,8 +7,7 @@ require("dotenv").config();
 const { requestLogger, errorLogger } = require("./middlewares/loggers");
 const errorHandler = require("./middlewares/error-handler");
 const router = require("./routes");
-const { NOT_FOUND } = require("./utils/errors");
-
+const { NotFoundError } = require("./utils/errors");
 const app = express();
 const { PORT = 3001 } = process.env;
 
@@ -25,8 +24,8 @@ app.use(requestLogger);
 
 app.use(router);
 
-app.use((req, res) => {
-  res.status(NOT_FOUND).send({ message: "Requested resource not found" });
+app.use((req, res, next) => {
+  next(new NotFoundError("Requested resource not found"));
 });
 
 app.use(errorLogger);

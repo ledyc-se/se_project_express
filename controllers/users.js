@@ -3,40 +3,42 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
+
 const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  CONFLICT,
-  SERVER_ERROR,
+  BadRequestError,
+  NotFoundError,
+  ConflictError,
+  ServerError,
+  UnauthorizedError,
 } = require("../utils/errors");
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
-  return User.findById(userId)
+  User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        throw new NotFoundError("User not found");
       }
 
       const userWithoutPassword = user.toObject();
       delete userWithoutPassword.password;
 
-      return res.send(userWithoutPassword);
+      res.send(userWithoutPassword);
     })
     .catch((err) => {
       console.error("getCurrentUser error:", err);
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
+      next(new ServerError("An error occurred while fetching user info"));
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { email, password, name, avatar } = req.body;
+
   if (!email || !password || !name) {
-    return res.status(BAD_REQUEST).send({ message: "Email, password, and name are required" })
-  };
+    return next(new BadRequestError("Email, password, and name are required"));
+  }
+
   bcrypt
     .hash(password, 10)
     .then((hash) =>
@@ -50,33 +52,29 @@ const createUser = (req, res) => {
     .then((user) => {
       const userWithoutPassword = user.toObject();
       delete userWithoutPassword.password;
-
       res.status(201).send(userWithoutPassword);
     })
     .catch((err) => {
-      if (err.code === 11000) {
-        return res.status(CONFLICT).send({ message: "User already exists" });
-      }
-      if (err instanceof mongoose.Error.ValidationError) {
-        return res.status(BAD_REQUEST).send({ message: err.message });
-      }
       console.error("Create User Error:", err);
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "Internal Server Error" });
+
+      if (err.code === 11000) {
+        next(new ConflictError("User already exists"));
+      } else if (err instanceof mongoose.Error.ValidationError) {
+        next(new BadRequestError("Invalid data when creating user"));
+      } else {
+        next(new ServerError("Internal server error"));
+      }
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "Email and password are required" });
+    return next(new BadRequestError("Email and password are required"));
   }
 
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -84,12 +82,12 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      console.error(err);
-      res.status(401).send({ message: "Incorrect email or password" });
+      console.error("Login error:", err);
+      next(new UnauthorizedError("Incorrect email or password"));
     });
 };
 
-const updateCurrentUser = (req, res) => {
+const updateCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   const { name, avatar } = req.body;
 
@@ -99,19 +97,22 @@ const updateCurrentUser = (req, res) => {
     { new: true, runValidators: true }
   )
     .then((user) => {
-      if (!user) return res.status(404).send({ message: "User not found" });
+      if (!user) {
+        throw new NotFoundError("User not found");
+      }
+
       const userObj = user.toObject();
       delete userObj.password;
       res.send(userObj);
     })
     .catch((err) => {
-      console.error(err);
+      console.error("Update user error:", err);
+
       if (err.name === "ValidationError") {
-        return res
-          .status(400)
-          .send({ message: "Invalid data provided for update" });
+        next(new BadRequestError("Invalid data provided for update"));
+      } else {
+        next(new ServerError("An error occurred while updating user"));
       }
-      res.status(500).send({ message: "Server error" });
     });
 };
 
