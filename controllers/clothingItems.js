@@ -7,15 +7,15 @@ const {
   FORBIDDEN,
 } = require("../utils/errors");
 
-const getItems = (req, res) =>
-  Item.find({})
+const getItems = (req, res) => {
+  return Item.find({})
     .then((items) => res.send(items))
-    .catch((err) => {
-      console.error(err);
-      return res
+    .catch(() =>
+      res
         .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
-    });
+        .send({ message: "An error has occurred on the server" })
+    );
+};
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -24,12 +24,12 @@ const createItem = (req, res) => {
   return Item.create({ name, weather, imageUrl, owner })
     .then((item) => res.status(201).send(item))
     .catch((err) => {
-      console.error(err);
       if (err.name === "ValidationError") {
         return res
           .status(BAD_REQUEST)
           .send({ message: "Invalid data passed when creating an item" });
       }
+
       return res
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server" });
@@ -56,18 +56,18 @@ const deleteItem = async (req, res) => {
     await item.deleteOne();
     return res.send({ message: "Item deleted" });
   } catch (err) {
-    console.error(err);
     if (err.name === "CastError") {
       return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
     }
+
     return res
       .status(SERVER_ERROR)
       .send({ message: "An error has occurred on the server" });
   }
 };
 
-const likeItem = (req, res) =>
-  Item.findByIdAndUpdate(
+const likeItem = (req, res, next) => {
+  return Item.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
@@ -76,19 +76,19 @@ const likeItem = (req, res) =>
       if (!item) {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
+
       return res.send(item);
     })
     .catch((err) => {
-      console.error(err);
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
       }
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
-    });
 
-const dislikeItem = (req, res) => {
+      return next(err);
+    });
+};
+
+const dislikeItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
@@ -104,14 +104,10 @@ const dislikeItem = (req, res) => {
       if (!item) {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
+
       return res.send(item);
     })
-    .catch((err) => {
-      console.error("Dislike Item Error:", err);
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "Internal server error" });
-    });
+    .catch((err) => next(err));
 };
 
 module.exports = {

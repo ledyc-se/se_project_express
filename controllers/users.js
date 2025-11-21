@@ -10,7 +10,7 @@ const {
   SERVER_ERROR,
 } = require("../utils/errors");
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   return User.findById(userId)
@@ -24,20 +24,19 @@ const getCurrentUser = (req, res) => {
 
       return res.send(userWithoutPassword);
     })
-    .catch((err) => {
-      console.error("getCurrentUser error:", err);
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
-    });
+    .catch((err) => next(err));
 };
 
 const createUser = (req, res) => {
   const { email, password, name, avatar } = req.body;
+
   if (!email || !password || !name) {
-    return res.status(BAD_REQUEST).send({ message: "Email, password, and name are required" })
-  };
-  bcrypt
+    return res
+      .status(BAD_REQUEST)
+      .send({ message: "Email, password, and name are required" });
+  }
+
+  return bcrypt
     .hash(password, 10)
     .then((hash) =>
       User.create({
@@ -51,16 +50,17 @@ const createUser = (req, res) => {
       const userWithoutPassword = user.toObject();
       delete userWithoutPassword.password;
 
-      res.status(201).send(userWithoutPassword);
+      return res.status(201).send(userWithoutPassword);
     })
     .catch((err) => {
       if (err.code === 11000) {
         return res.status(CONFLICT).send({ message: "User already exists" });
       }
+
       if (err instanceof mongoose.Error.ValidationError) {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
-      console.error("Create User Error:", err);
+
       return res
         .status(SERVER_ERROR)
         .send({ message: "Internal Server Error" });
@@ -81,37 +81,41 @@ const login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.send({ token });
+
+      return res.send({ token });
     })
-    .catch((err) => {
-      console.error(err);
-      res.status(401).send({ message: "Incorrect email or password" });
-    });
+    .catch(() =>
+      res.status(401).send({ message: "Incorrect email or password" })
+    );
 };
 
 const updateCurrentUser = (req, res) => {
   const userId = req.user._id;
   const { name, avatar } = req.body;
 
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     userId,
     { name, avatar },
     { new: true, runValidators: true }
   )
     .then((user) => {
-      if (!user) return res.status(404).send({ message: "User not found" });
-      const userObj = user.toObject();
-      delete userObj.password;
-      res.send(userObj);
+      if (!user) {
+        return res.status(NOT_FOUND).send({ message: "User not found" });
+      }
+
+      const userWithoutPassword = user.toObject();
+      delete userWithoutPassword.password;
+
+      return res.send(userWithoutPassword);
     })
     .catch((err) => {
-      console.error(err);
-      if (err.name === "ValidationError") {
+      if (err instanceof mongoose.Error.ValidationError) {
         return res
-          .status(400)
+          .status(BAD_REQUEST)
           .send({ message: "Invalid data provided for update" });
       }
-      res.status(500).send({ message: "Server error" });
+
+      return res.status(SERVER_ERROR).send({ message: "Server error" });
     });
 };
 
