@@ -1,27 +1,81 @@
-# WTWR (What To Wear?)
+# 🧥 SE_project_react
 
-WTWR is a full-stack web application that helps users choose outfits based on the weather and their saved wardrobe items.
-
----
-
-## 🚀 Features
-
-- Create an account and log in securely.
-- Add, like, and delete clothing items.
-- View outfit recommendations based on live weather data.
-- Manage profile and wardrobe in one place.
+A **full-stack weather-based wardrobe app** that helps users decide what to wear depending on the day’s forecast.  
+Built with a **React frontend** and a **Node.js/Express + MongoDB backend**.  
+Perfect for anyone who wants to manage their wardrobe and see suggestions based on the current weather.
 
 ---
 
-## 🛠️ Technologies & Techniques
+## 🚀 Demo
 
-- **Frontend:** React, JSX, CSS, responsive design
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB with Mongoose
-- **Authentication:** JWT (JSON Web Tokens)
-- **Validation:** Celebrate/Joi for request validation
-- **Error Handling:** Centralized Express middleware, custom error classes
-- **Code Quality:** ESLint (Airbnb style), Prettier, EditorConfig
-- **Version Control:** Git + GitHub
+[🌐 Live Demo](https://github.com/ledyc-se/se_project_react)
+
+_(Frontend + Backend can both run locally — see setup instructions below.)_
 
 ---
+
+## 📸 Screenshots
+
+| Feature       | Preview                                        |
+| ------------- | ---------------------------------------------- |
+| 🌤 Main UI     | ![Screenshot](/src/images/Screenshot.jpg)      |
+| 🧾 Item Modal | ![Screenshot](/src/images/modalScreenshot.jpg) |
+
+---
+
+## 🛠 Features
+
+- 👕 **Add, View, and Delete Clothing Items** — Users can upload items with images, name, and suitable weather type.
+- 🌡 **Weather Integration** — Displays real-time weather to suggest appropriate clothes.
+- 🧍‍♂️ **User Authentication** — Sign up, log in, and manage your personal wardrobe.
+- 💬 **Interactive Modals** — Clean modals for previewing, confirming deletion, and editing profile info.
+- ❤️ **Like System** — Logged-in users can like or unlike items.
+- 📱 **Responsive Design** — Works seamlessly across devices.
+- 🔐 **Full CRUD Backend** — Built with Express.js, Mongoose, and JWT for secure data handling.
+
+---
+
+## ⚙️ Tech Stack
+
+**Frontend:**
+
+- React (with Context API & Hooks)
+- React Router
+- CSS (custom modular styles)
+
+**Backend:**
+
+- Node.js + Express
+- MongoDB + Mongoose
+- JWT Authentication
+- bcrypt for password hashing
+- RESTful API
+
+---Link to backend: https://github.com/ledyc-se/se_project_express.git
+
+## Project Domain: https://wtwrledyy.bot.nu
+
+## Link to Project Pitch
+
+https://drive.google.com/file/d/19pMmVPQZZVepEKAyuhS0M-0PLIuoClWi/view?usp=sharing
+
+## 🧩 Project Structure
+
+se_project_react/
+├── frontend/
+│ ├── src/
+│ │ ├── components/
+│ │ ├── contexts/
+│ │ ├── images/
+│ │ ├── utils/
+│ │ └── App.jsx
+│ └── package.json
+│
+├── backend/
+│ ├── models/
+│ ├── routes/
+│ ├── controllers/
+│ ├── utils/
+│ └── server.js
+│
+└── README.md
