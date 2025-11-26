@@ -9,7 +9,7 @@ const errorHandler = require("./middlewares/error-handler");
 const router = require("./routes");
 const { NotFoundError } = require("./utils/errors");
 const app = express();
-const { PORT = 3001 } = process.env;
+const { PORT = 3002 } = process.env;
 
 app.get("/crash-test", () => {
   setTimeout(() => {
@@ -31,6 +31,13 @@ app.use((req, res, next) => {
 app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
+
+app.use(
+  cors({
+    origin: ["https://wtwrledyy.bot.nu", "http://localhost:3000"],
+    credentials: true,
+  })
+);
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/wtwr_db")

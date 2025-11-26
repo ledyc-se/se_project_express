@@ -7,16 +7,6 @@ const {
   ServerError,
 } = require("../utils/errors");
 
-<<<<<<< HEAD
-const getItems = (req, res) => {
-  return Item.find({})
-    .then((items) => res.send(items))
-    .catch(() =>
-      res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" })
-    );
-=======
 const getItems = (req, res, next) => {
   Item.find({})
     .then((items) => res.send(items))
@@ -24,7 +14,6 @@ const getItems = (req, res, next) => {
       console.error(err);
       next(new ServerError("An error occurred while fetching items"));
     });
->>>>>>> 0fccd469bd0d56901ca85a3294d5f31dd73388f8
 };
 
 const createItem = (req, res, next) => {
@@ -39,13 +28,6 @@ const createItem = (req, res, next) => {
       } else {
         next(new ServerError("An error occurred while creating the item"));
       }
-<<<<<<< HEAD
-
-      return res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
-=======
->>>>>>> 0fccd469bd0d56901ca85a3294d5f31dd73388f8
     });
 };
 
@@ -72,22 +54,11 @@ const deleteItem = async (req, res, next) => {
     } else {
       next(err);
     }
-<<<<<<< HEAD
-
-    return res
-      .status(SERVER_ERROR)
-      .send({ message: "An error has occurred on the server" });
-=======
->>>>>>> 0fccd469bd0d56901ca85a3294d5f31dd73388f8
   }
 };
 
 const likeItem = (req, res, next) => {
-<<<<<<< HEAD
-  return Item.findByIdAndUpdate(
-=======
   Item.findByIdAndUpdate(
->>>>>>> 0fccd469bd0d56901ca85a3294d5f31dd73388f8
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
@@ -96,12 +67,7 @@ const likeItem = (req, res, next) => {
       if (!item) {
         throw new NotFoundError("Item not found");
       }
-<<<<<<< HEAD
-
-      return res.send(item);
-=======
       res.send(item);
->>>>>>> 0fccd469bd0d56901ca85a3294d5f31dd73388f8
     })
     .catch((err) => {
       if (err.name === "CastError") {
@@ -109,17 +75,9 @@ const likeItem = (req, res, next) => {
       } else {
         next(new ServerError("An error occurred while liking the item"));
       }
-<<<<<<< HEAD
-
-      return next(err);
     });
 };
 
-=======
-    });
-};
-
->>>>>>> 0fccd469bd0d56901ca85a3294d5f31dd73388f8
 const dislikeItem = (req, res, next) => {
   const { itemId } = req.params;
 
@@ -136,19 +94,12 @@ const dislikeItem = (req, res, next) => {
       if (!item) {
         throw new NotFoundError("Item not found");
       }
-<<<<<<< HEAD
-
-      return res.send(item);
-    })
-    .catch((err) => next(err));
-=======
       res.send(item);
     })
     .catch((err) => {
       console.error("Dislike Item Error:", err);
       next(new ServerError("An error occurred while disliking the item"));
     });
->>>>>>> 0fccd469bd0d56901ca85a3294d5f31dd73388f8
 };
 
 module.exports = {
